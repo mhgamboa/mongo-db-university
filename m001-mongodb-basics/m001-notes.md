@@ -61,6 +61,35 @@
 
 ## Chapter 3: Creating and Manipulating Documents
 
+- Every MongoDB document has a unique `"_id"` key value pair. The value for `_"id"` is automatically generated: this value is called `ObjectId()`
+  - You can use your own unique value instead if you want
+  - Duplicate documents can be created as long as the `_id` fields are not the same
+- If you use `mongoimport <uri> fileName.json`, an error will be thrown for trying to import duplicate data UNLESS you use the "--drop" option at the end. EX: `mongoimport <uri> --drop fileName.json`
+- You can **insert documents** by using `db.collectionName.insert(<document>)`, or by using the MongoDB Atlas
+- To **insert multiple documents** pass an array into the `.insert()` method, with each array item being a document. EX:
+  - `db.collectionName.insert([<document1>, <document2>, <document3>])`
+  - When inserting multiple documents, the inserting process will stop if a duplicate `_id` field is inserted. To preveint this use the `{"ordered": false}` option. EX:
+    - `db.collection.insert([{"object1": true}, {"object2": true}], {"ordered": false})`
+
+### Updating Documents
+
+- Use `updateOne()` to **update one document**
+- Use `updateMany()` to **update many documents**
+  - Syntax is: `db.collectionName.updateOne({<whatToFind>}, {"$inc": {"key": "valueToIncrement"}})`
+- `$inc` **increments** the field value by a specified amount.
+- `$set` **updates** the value of the given field with the specified value. If the field doesn't exist, it creates a new one.
+- `$push` **adds items** to an array, or creates a new array if the field doesn't exist.
+- Putting it all together:
+  - `db.zips.updateMany({ "city": "HUDSON" }, { "$inc": { "pop": 10 } })`
+
+### Deleting Documents
+
+- Use `deleteOne()` to **delete one document**
+- Use `deleteMany()` to **delete many documents**
+- Use `db.collectionName.drop()` to **delete a collection**
+- You can also use the Atlas UI to delte documets, databases, or collections
+  - Deleting all collections will also remove the database
+
 ## Chapter 4: Advanced CRUD Operations
 
 ## Chapter 5: Indexing and Aggregation Pipeline
