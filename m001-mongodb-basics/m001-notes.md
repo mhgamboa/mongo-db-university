@@ -76,6 +76,9 @@
 - Use `updateOne()` to **update one document**
 - Use `updateMany()` to **update many documents**
   - Syntax is: `db.collectionName.updateOne({<whatToFind>}, {"$inc": {"key": "valueToIncrement"}})`
+
+### Update Operators
+
 - `$inc` **increments** the field value by a specified amount.
 - `$set` **updates** the value of the given field with the specified value. If the field doesn't exist, it creates a new one.
 - `$push` **adds items** to an array, or creates a new array if the field doesn't exist.
@@ -91,6 +94,79 @@
   - Deleting all collections will also remove the database
 
 ## Chapter 4: Advanced CRUD Operations
+
+- **LOGIC OPERATORS GO 1ST, QUERY OPERATORS GO 2ND.** But, **`$expr` MAKES QUERY OPERATORS GO FIRST AS WELL**
+
+### Query Operators
+
+- `$eq`: **equal to**
+- `$ne`: **not equal to**
+- `$gt`: **greater than**
+- `$lt`: **less than**
+- `$gte`: **greater than or equal to**
+- `$lte`: **less than or equal to**
+- EXAMPLE: `db.trips.find({ "tripduration": { "$lte" : 70 }, "usertype": { "$ne": "Subscriber" } }).pretty()`
+
+### Logic Operators
+
+- `$or`: **match one** query clause
+- `$nor`: anything doat **doesn't match both** query clauses (kind of like a combination of `$not` and `$or`)
+  - These three share common syntax by using an array. Example: `{"$logic":[{filter1}, {filter2}] }`
+- `$and`: **match all** query clauses
+
+  - A lot of times `$and` is used implicitly without you needing to use it. Example:
+    - `{"$and": [{"student_id": {"$gt": 25} }, {"student_id": {"$lt": 100}} ]}` versus
+    - `{"student_id": {"$gt": 25, "$lt": 100}}`
+    - Generally speaking you only need to use `$and` when you use the same operator more than once
+
+- `$not` - **negates** the query requriement. Example:
+  - `$not` syntax example: `{"student_id": {"$not": {"$gt": 25}} }`
+
+### $expr
+
+- `$expr` allows the use of aggregation expressions (More on that later)
+- `$expr` **allows for the use of variables**. You just have to use a `$` to denote what the variable is. Example:
+  - `db.trips.find({ "$expr": { "$eq": [ "$end station id", "$start station id"] }}).count()`
+
+### Array Operators
+
+- `$all` helps you search withing arrays, as it does not care where the items are found in the array, as long as it exists.
+  - **Without `$all` MongoDB will look for an exact array match**
+- `$size` disgnates the exact number of array items that must exists to match
+- Example:
+
+```
+db.listingsAndReviews.find({
+  "amenities": {
+    "$size": 20,
+    "$all": [ "Internet", "Wifi",  "Kitchen"]
+  }
+}).pretty()
+```
+
+### Projections
+
+- **Projections** tell your search query which parts of the cursor should be shown. This is the second argument of the `.find()` method and is written as a JSON object.
+- The field is what you want displayed, and the value can be 0 or 1. 1 says include only these values. 0 says exclude these values, and show everything else.
+  - **If you use $elemMatch, you don't use 0s or 1s.**
+- You can use both 1 and 0 if the 0 is for `_id`
+- `$elemMatch` can be used with either the queries or projections for .find().
+  - For queries $elemMatch is similar to .find() but for finding data that is within a subdocument within an array EX:
+
+```
+db.grades.find({ "scores": { "$elemMatch": { "type": "extra credit" } }
+}) //Find all documents where the student had an extra credit score:
+```
+
+### Array operators and Sub Documents
+
+- To search through subdocuments use dot notation. This is also applicable to arrays. EX:
+  - `db.<collection>.find("desired field.desired sub field": "desired sub value" )` //All spaces are included
+  - `db.<collection>.find("desired field.0.desired sub field": "desired sub value" )` //The 0 is for the first array item
+- $regex allows you to match parts of a string. EX:
+  - `{ <field>: { $regex: /pattern/, $options: '<options>' } }`
+  - `{ <field>: { $regex: 'pattern', $options: '<options>' } }`
+  - `{ <field>: { $regex: /pattern/<options> } }`
 
 ## Chapter 5: Indexing and Aggregation Pipeline
 
