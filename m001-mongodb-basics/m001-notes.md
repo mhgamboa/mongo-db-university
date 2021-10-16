@@ -170,4 +170,85 @@ db.grades.find({ "scores": { "$elemMatch": { "type": "extra credit" } }
 
 ## Chapter 5: Indexing and Aggregation Pipeline
 
+- Essentially, the Aggregation Framework is just another way to query MongoDB databases, but it lets you do more than just find data.
+- To use the aggregation framework use `.aggregate()` instead of `.find()`
+  - The biggest difference between `.aggregate()` and `.find()` is that `.aggregate()` uses an array as the base instead of an object.
+  - **The order matters in `.aggregate()`!** Data is filtered one query at a time. Here is an `.aggregate()` example:
+
+```
+db.listingsAndReviews.aggregate([
+  { "$match": { "amenities": "Wifi" } }, // Filters this first
+  { "$project": { "price": 1,"address": 1, "_id": 0 }} // Filters this second
+]).pretty()
+```
+
+- **`$match`** filters documents so that only documents that meet the specified criteria will be passed through
+- **`$project`** gets rid of all of the fields not requested
+
+- **`$group`** is an operator that takes an incoming stream of data and siphons it into multiple distinct reserviors.
+- **The first part of `$group`** creates a new cursor based on the results you want.
+- `$group` syntax is `{"$group": {newFieldName: "$oldFieldNameYouWantToGroup"}}`. EXAMPLE:
+
+```
+db.listingsAndReviews.aggregate([{ "$group": { "_id": "$address.country" }}])
+
+// Returns:
+// { "_id" : "Australia" }
+// { "_id" : "Brazil" }
+// { "_id" : "Hong Kong" }
+// etc.
+```
+
+- **The second part of `$group`** allows you to use quantitative analysis. EXAMPLE:
+
+```
+db.listingsAndReviews.aggregate([
+  {"$project": { "address": 1, "_id": 0 }},
+  {"$group": {
+    "_id": "$address.country",
+    "count": { "$sum": 1 }
+  }}
+])
+```
+
+- This example assigns the sum to "count" in the new cursor
+- Usually you will use a value from the object instead of 1, but for this example we are just counting
+
+### Sort & Limit
+
+- `sort()` and `.limit()` are cursor methods just likehow .pretty() and .count() are.
+  - `.limit()` limits the amount of documents shown in the cursor.
+  - `.sort()` will sort the documents as specified
+    - you can even sort with 2 parameters, but remember that order is important.
+  - **When used together use MongoDB will always apply `.sort()` before `.limit()`, Regardless of the order you put them in.** That being said, you should still use `.sort()` before .limit() as a good practice (since order is important) EXAMPLE:
+
+```
+db.zips.find().sort({ "pop": -1 }).limit(10)
+```
+
+- This example sorts by population decending (positive 1 would be ascending) and only shows 10 documents
+
+### Indexes
+
+- **Indexes make your searches faster** (Like how indexes in the back of a book make your searches faster)
+- **To create an index** use the `.createIndex` cursor method. Example:
+
+```
+db.trips.createIndex({ "birth year": 1 })
+db.trips.createIndex({ "start station id": 1, "birth year": 1 })
+```
+
+- "1" mean in ascending order
+
+### Data Modeling
+
+- TL;DR Data should be stored in the way that it is queried
+- As your application evolves, so should your data model
+
+### Update and Upsert
+
+- `.Upsert()` is a combination of update and insert.
+- It will update or insert after searching the database
+- It is part of the `.updateOne()` cursor method. EXAMPLE:
+
 ## Chapter 6: Next Steps
