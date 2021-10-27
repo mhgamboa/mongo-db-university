@@ -250,5 +250,3 @@ db.trips.createIndex({ "start station id": 1, "birth year": 1 })
 - `.Upsert()` is a combination of update and insert.
 - It will update or insert after searching the database
 - It is part of the `.updateOne()` cursor method. EXAMPLE:
-
-## Chapter 6: Next Steps

@@ -1,3 +1,3 @@
 # mongo-db-university
 
-See each folder for individual notes.
+See notes folder for individual notes.
