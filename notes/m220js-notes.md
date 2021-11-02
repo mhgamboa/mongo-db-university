@@ -97,8 +97,20 @@ await sessions.updateOne({ user_id: email }, { $set: { jwt: jwt } }, { upsert: t
 ### Delete
 
 - There's `deleteOne()` and `deleteMany()`
-- If multiple documents match, then `deleteOne()` will delete whatever is next in the $natural order
 
 ## Chapter 3: Admin Backend
+
+- **Read Concerns** - Making sure the data is read correctly
+  - **Read concern local** is when only the primary node is read - there is no garuntee the data is on the majority of nodes (this is default in MongoDB)
+  - **Read concern majority** is when the majority of nodes are garunteed to have the same data. It may still be incorrect, but is less likely
+- **Read isolation** is when read data hasn't been replicated to all of the nodes. **Low isolation** means the data hasn't been replicated a lot
+
+- If we need to write a bunch of differenct documents we can make **Bulk Writes**, to perform this more efficiently as opposed to sending them one at a time. It is ordered by default
+
+```
+db.stock.bulkWrite([{,
+  updateOne:{}
+}], {ordered: false}) // Writes them all in parallel. If one fails, the others will still continue their execution
+```
 
 ## Chapter 4: Resiliency
